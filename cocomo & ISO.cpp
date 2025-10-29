@@ -1,0 +1,146 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <iomanip>
+#include <cmath>
+#include <vector>
+using namespace std;
+
+int countLOC(const string &filename) {
+    ifstream file(filename.c_str());
+    if (!file.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        return -1;
+    }
+
+    string line;
+    int loc = 0;
+    while (getline(file, line)) {
+        if (line.find_first_not_of(" \t\n") != string::npos &&
+            line[0] != '/' && line[0] != '*') {
+            loc++;
+        }
+    }
+    file.close();
+    return loc;
+}
+
+void cocomo(double kloc, string mode, double a, double b, double c, double d) {
+    double effort = a * pow(kloc, b);
+    double dev_time = c * pow(effort, d);
+    double staffing = effort / dev_time;
+    double productivity = kloc / effort;
+
+    cout << left << setw(15) << mode
+         << setw(20) << fixed << setprecision(2) << effort
+         << setw(20) << fixed << setprecision(2) << dev_time
+         << setw(20) << fixed << setprecision(2) << staffing
+         << setw(20) << fixed << setprecision(4) << productivity
+         << endl;
+}
+
+// --- Quality Objectives and Compliance Section ---
+struct QualityObjective {
+    string description;
+    string metric;
+    double targetValue;
+};
+
+struct ComplianceItem {
+    string description;
+    bool completed;
+};
+
+void display_quality_objectives(const vector<QualityObjective>& objectives) {
+    cout << "\nQuality Objectives:\n";
+    for (size_t i = 0; i < objectives.size(); i++) {
+        cout << "- " << objectives[i].description
+             << " | Metric: " << objectives[i].metric
+             << " | Target: " << fixed << setprecision(2)
+             << objectives[i].targetValue << endl;
+    }
+}
+
+void display_compliance_checklist(const vector<ComplianceItem>& checklist) {
+    cout << "\nCompliance Checklist:\n";
+    for (size_t i = 0; i < checklist.size(); i++) {
+        cout << "- " << checklist[i].description
+             << " | Completed: " << (checklist[i].completed ? "Yes" : "No") << endl;
+    }
+}
+
+int main() {
+    string filename;
+    cout << "Enter the source file name (e.g., CourseSystem.cpp): ";
+    cin >> filename;
+
+    int loc = countLOC(filename);
+    if (loc == -1) return 0;
+
+    cout << "\nEstimated Lines of Code (LOC): " << loc << endl;
+    double kloc = loc / 1000.0;
+
+    int modeChoice;
+    cout << "\nChoose estimation mode:\n";
+    cout << "1. Organic\n2. Semi-Detached\n3. Embedded\n4. Compare All Modes\n5. Exit\n";
+    cout << "Enter choice: ";
+    cin >> modeChoice;
+
+    cout << "\nResults for " << kloc << " KLOC:\n";
+    cout << left << setw(15) << "Project Type"
+         << setw(20) << "Effort (PM)"
+         << setw(20) << "Dev Time (Months)"
+         << setw(20) << "Avg. Staffing"
+         << setw(20) << "Productivity"
+         << endl;
+    cout << string(95, '-') << endl;
+
+    switch (modeChoice) {
+        case 1:
+            cocomo(kloc, "Organic", 2.4, 1.05, 2.5, 0.38);
+            break;
+        case 2:
+            cocomo(kloc, "Semi-Detached", 3.0, 1.12, 2.5, 0.35);
+            break;
+        case 3:
+            cocomo(kloc, "Embedded", 3.6, 1.20, 2.5, 0.32);
+            break;
+        case 4:
+            cocomo(kloc, "Organic", 2.4, 1.05, 2.5, 0.38);
+            cocomo(kloc, "Semi-Detached", 3.0, 1.12, 2.5, 0.35);
+            cocomo(kloc, "Embedded", 3.6, 1.20, 2.5, 0.32);
+            break;
+        case 5:
+            cout << "\nExiting program. Thank you!\n";
+            return 0;
+        default:
+            cout << "Invalid choice!" << endl;
+            return 0;
+    }
+
+    // ? Compatible C++98 style vector initialization
+    vector<QualityObjective> objectives;
+    QualityObjective q1; q1.description = "Defect Density"; q1.metric = "defects/KLOC"; q1.targetValue = 0.50;
+    QualityObjective q2; q2.description = "Requirements Traceability"; q2.metric = "%"; q2.targetValue = 100.0;
+    QualityObjective q3; q3.description = "Complaint Response Time"; q3.metric = "days"; q3.targetValue = 5.0;
+    objectives.push_back(q1);
+    objectives.push_back(q2);
+    objectives.push_back(q3);
+
+    display_quality_objectives(objectives);
+
+    vector<ComplianceItem> checklist;
+    ComplianceItem c1; c1.description = "Requirements validation documented"; c1.completed = true;
+    ComplianceItem c2; c2.description = "Design review performed"; c2.completed = false;
+    ComplianceItem c3; c3.description = "Testing covers all requirements"; c3.completed = true;
+    ComplianceItem c4; c4.description = "ISO audit completed for this phase"; c4.completed = false;
+    checklist.push_back(c1);
+    checklist.push_back(c2);
+    checklist.push_back(c3);
+    checklist.push_back(c4);
+
+    display_compliance_checklist(checklist);
+
+    return 0;
+}
+
