@@ -118,7 +118,7 @@ int main() {
             return 0;
     }
 
-    // ? Compatible C++98 style vector initialization
+    
     vector<QualityObjective> objectives;
     QualityObjective q1; q1.description = "Defect Density"; q1.metric = "defects/KLOC"; q1.targetValue = 0.50;
     QualityObjective q2; q2.description = "Requirements Traceability"; q2.metric = "%"; q2.targetValue = 100.0;
@@ -143,5 +143,6 @@ int main() {
 
     return 0;
 }
+
 
 
